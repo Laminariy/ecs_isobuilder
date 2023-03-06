@@ -1,0 +1,41 @@
+local Click = require('source.ecs.entities.click')
+local rendercam = require('rendercam.rendercam')
+local screen_to_world = rendercam.screen_to_world_2d
+local globals = require('source.globals')
+local world = globals.world
+
+
+local COLLISION_RESPONSE = hash('collision_response')
+local TOUCH_ACTION = hash('touch')
+local ZOOM_IN = hash('zoom_in')
+local ZOOM_OUT = hash('zoom_out')
+
+
+function update(self, dt)
+	self.collisions = {}
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == COLLISION_RESPONSE then
+		table.insert(self.collisions, {id = message.other_id, group = message.other_group})
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == nil then
+		go.set_position(screen_to_world(action.screen_x, action.screen_y))
+	elseif action_id == ZOOM_IN then
+		local zoom = rendercam.get_ortho_scale()
+		zoom = math.max(1, zoom - 0.2)
+		rendercam.set_ortho_scale(zoom)
+		go.set_position(screen_to_world(action.screen_x, action.screen_y))
+	elseif action_id == ZOOM_OUT then
+		local zoom = rendercam.get_ortho_scale()
+		zoom = math.min(8, zoom + 0.2)
+		rendercam.set_ortho_scale(zoom)
+		go.set_position(screen_to_world(action.screen_x, action.screen_y))
+	elseif action_id == TOUCH_ACTION and action.pressed then
+		local click = Click(self.collisions)
+		world:add_entity(click)
+	end
+end

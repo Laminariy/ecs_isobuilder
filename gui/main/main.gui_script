@@ -1,0 +1,64 @@
+local RandomConstructionRequest = require('source.ecs.components.random_construction_request')
+local RandomDestroyRequest = require('source.ecs.components.random_destroy_request')
+local dirtylarry = require('dirtylarry.dirtylarry')
+local globals = require('source.globals')
+local world = globals.world
+local construction_map = globals.scene.construction_map
+
+
+local TOUCH_ACTION = hash('touch')
+local SHOW_ERROR_MSG = hash('show_error')
+local UPDATE_COUNTER = hash('update_counter')
+
+
+local function show_error(error)
+	local text = gui.new_text_node(vmath.vector3(480, -50, 0), error)
+	gui.set_color(text, vmath.vector4(1, 0, 0, 1))
+	gui.animate(text, 'position.y', 100, gui.EASING_OUTQUAD, 1.2, 0, function()
+		gui.animate(text, 'color.w', 0, gui.EASING_LINEAR, 0.5, 0.2, function()
+			gui.delete_node(text)
+		end)
+	end, gui.PLAYBACK_ONCE_FORWARD)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == SHOW_ERROR_MSG then
+		show_error(message.msg)
+	elseif message_id == UPDATE_COUNTER then
+		gui.set_text(gui.get_node('current_object_count'), message.msg)
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == TOUCH_ACTION and gui.pick_node(gui.get_node('panel'), action.x, action.y) then
+		-- gui click
+		-- +- 10
+		dirtylarry:button('button_plus_10', action_id, action, function()
+			construction_map.random_construction_request = RandomConstructionRequest(10)
+			world:add_entity(construction_map)
+		end)
+		dirtylarry:button('button_minus_10', action_id, action, function()
+			construction_map.random_destroy_request = RandomDestroyRequest(10)
+			world:add_entity(construction_map)
+		end)
+		-- +- 100
+		dirtylarry:button('button_plus_100', action_id, action, function()
+			construction_map.random_construction_request = RandomConstructionRequest(100)
+			world:add_entity(construction_map)
+		end)
+		dirtylarry:button('button_minus_100', action_id, action, function()
+			construction_map.random_destroy_request = RandomDestroyRequest(100)
+			world:add_entity(construction_map)
+		end)
+		-- +- 1000
+		dirtylarry:button('button_plus_1000', action_id, action, function()
+			construction_map.random_construction_request = RandomConstructionRequest(1000)
+			world:add_entity(construction_map)
+		end)
+		dirtylarry:button('button_minus_1000', action_id, action, function()
+			construction_map.random_destroy_request = RandomDestroyRequest(1000)
+			world:add_entity(construction_map)
+		end)
+		return true
+	end
+end

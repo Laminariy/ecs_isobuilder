@@ -1,0 +1,43 @@
+math.randomseed(os.time())
+local globals = require('source.globals')
+local world = globals.world
+local camera = globals.scene.camera
+require('source.ecs.systems.init')
+
+local RIGHT = hash('right')
+local UP = hash('up')
+local LEFT = hash('left')
+local DOWN = hash('down')
+
+
+function init(self)
+	-- acquire input focus in order
+	msg.post('.', 'acquire_input_focus')
+	msg.post('/cursor', 'acquire_input_focus')
+	msg.post('/gui', 'acquire_input_focus')
+end
+
+function fixed_update(self, dt)
+	world:update(dt)
+end
+
+function on_input(self, action_id, action)
+	--local pos
+	if action_id == UP then
+		camera.direction.y = 1
+		camera.update_position_request = true
+		world:add_entity(camera)
+	elseif action_id == DOWN then
+		camera.direction.y = -1
+		camera.update_position_request = true
+		world:add_entity(camera)
+	elseif action_id == LEFT then
+		camera.direction.x = -1
+		camera.update_position_request = true
+		world:add_entity(camera)
+	elseif action_id == RIGHT then
+		camera.direction.x = 1
+		camera.update_position_request = true
+		world:add_entity(camera)
+	end
+end
